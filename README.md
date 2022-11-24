@@ -1,0 +1,2 @@
+# ChupaSkills
+Plugin minecraft ChupaSkill
