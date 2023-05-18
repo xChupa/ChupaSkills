@@ -1,9 +1,9 @@
 name: ChupaSkils
 version: '${project.version}'
-main: chupa.skills.chupaskils.main
+main: chupa.skills.chupaskils.ChupaSkils
 authors: [ xChupa ]
 commands:
   skill:
     aliases:
-      -skills
+      - skills
     usage: /skill
