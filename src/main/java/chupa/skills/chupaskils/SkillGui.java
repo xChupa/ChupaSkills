@@ -23,7 +23,7 @@ class SkillGui implements Listener {
         Player player = (Player) event.getWhoClicked();
 
         Inventory inv = event.getView().getTopInventory();
-        if(!event.getView().getTitle().startsWith(invid) || inv.getSize() != 27 || event.getClickedInventory()!=inv) {
+        if(inv == null || !inv.getTitle().startsWith(invid) || inv.getSize() != 27 || event.getClickedInventory()!=inv) {
         	return;
         }
         event.setCancelled(true);
@@ -34,29 +34,27 @@ class SkillGui implements Listener {
         if(slot == 22) {
         	SkillData.set(player, SkillType.MESSAGES, SkillData.get(player, SkillType.MESSAGES)==0?(byte)1:(byte)0);
         	SkillData.save(player);
-        	event.getInventory().setItem(22, getOption(player));
+        	inv.setItem(22, getOption(player));
         	return;
         }
     	SkillType skilltype = SkillType.getByMenuplace(slot);
         if(skilltype==null) {
         	return;
         }
-    	int explevel = player.getLevel();
         byte lvl = SkillData.get(player, skilltype);
         if(lvl>=skilltype.maxlevel) {
         	player.sendMessage(LangOptions.maxlvl.getMsg(player));
             return;
         }
-        int price_exp = ChupaSkils.config().getInt("start_price_exp");
-        price_exp*=lvl;
-        if (price_exp == 0){
-            price_exp = 2;
-        }
-        if(explevel < price_exp){
+        int exp = Experience.getExp(player);
+        int price_exp = Experience.getExpFromLevel(getPriceLevels(lvl));
+        if(exp < price_exp){
         	player.sendMessage(LangOptions.noexp.getMsg(player));
             return;
         }
-        player.setLevel(explevel - price_exp);
+        exp-=price_exp;
+        Experience.setExp(player, exp);
+        
         SkillData.set(player, skilltype, ++lvl);
         SkillData.save(player);
         SkillData.update(player, skilltype);
@@ -85,14 +83,14 @@ class SkillGui implements Listener {
         iskills.setItem(22, getOption(player));
         player.openInventory(iskills);
     }
-    private static Integer getPriceLvl(Player player, SkillType skill) {
-        int price_lvl = ChupaSkils.config().getInt("start_price_exp");
-        
-        price_lvl*=SkillData.get(player,skill);
-        if (price_lvl == 0){
-            price_lvl = 2;
+    private static Integer getPriceLevels(byte lvl) {
+        int level = ChupaSkils.start_price_xp;
+        if (level<1){
+        	level=1;
         }
-        return price_lvl;
+        ++lvl;
+        level*=lvl;
+        return level;
     }
     private static void setBoard(Inventory inv) {
         ItemStack bord = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 15);
@@ -111,7 +109,7 @@ class SkillGui implements Listener {
     		ItemMeta meta = item.getItemMeta();
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
             meta.setDisplayName(LangOptions.valueOf(invitem + "_name").getMsg(player));
-            meta.setLore(LangOptions.valueOf(invitem + "_lore").getMsgs(player, new LangOptions.Placeholders("%lvl%", Byte.toString(lvl)), new LangOptions.Placeholders("%price_lvl%", Integer.toString(getPriceLvl(player, skill)))));
+            meta.setLore(LangOptions.valueOf(invitem + "_lore").getMsgs(player, new LangOptions.Placeholders("%lvl%", Byte.toString(lvl)), new LangOptions.Placeholders("%price_lvl%", Integer.toString(getPriceLevels(lvl)))));
     		item.setItemMeta(meta);
     	} catch (IllegalArgumentException e) {
     	}
