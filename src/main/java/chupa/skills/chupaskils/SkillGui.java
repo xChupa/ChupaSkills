@@ -23,7 +23,7 @@ class SkillGui implements Listener {
         Player player = (Player) event.getWhoClicked();
 
         Inventory inv = event.getView().getTopInventory();
-        if(inv == null || !inv.getTitle().startsWith(invid) || inv.getSize() != 27 || event.getClickedInventory()!=inv) {
+        if(inv == null || !event.getView().getTitle().startsWith(invid) || inv.getSize() != 27 || event.getClickedInventory()!=inv) {
         	return;
         }
         event.setCancelled(true);
